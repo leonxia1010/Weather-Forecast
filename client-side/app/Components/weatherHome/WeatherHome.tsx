@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import {
   getCurrentCityForecastData,
   type OpenWeatherForecastResponse,
-} from '../../api/openWeatherApi.ts';
+} from '../../api/openWeatherApi.js';
 import { Bounce, toast } from 'react-toastify';
 
 export interface MappedWeatherData {
