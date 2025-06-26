@@ -1,5 +1,5 @@
 import type { Route } from './+types/home';
-import { WeatherHome } from '../Components/weatherHome/WeatherHome';
+import { WeatherHome } from '../Components/WeatherHome/WeatherHome';
 import { ToastContainer } from 'react-toastify';
 
 export function meta({}: Route.MetaArgs) {
