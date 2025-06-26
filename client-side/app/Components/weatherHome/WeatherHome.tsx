@@ -22,8 +22,9 @@ import type {
   ForecastDisplayItem,
   MappedWeatherData,
 } from 'app/@type/weatherDataTypes.js';
-import InputSection from '../Input/InputSection.js';
+import InputSection from '../InputSection/InputSection.js';
 import { WeatherTypeMap, WeatherType } from 'app/@enum/weatherTypes.js';
+import LoadingAnimation from '../LoadingAnimation/LoadingAnimation.js';
 
 export const getWeatherIcon = (size = 24, color = '#fff') => {
   return {
@@ -37,14 +38,16 @@ export const getWeatherIcon = (size = 24, color = '#fff') => {
 };
 
 export function WeatherHome() {
-  const [data, setData] = useState<MappedWeatherData>();
+  const [data, setData] = useState<MappedWeatherData | undefined>(undefined);
   const [searchCity, setSearchCity] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     getWeatherData();
   }, []);
 
   const getWeatherData = async (city: string = 'Sydney') => {
+    setIsLoading(true);
     const weatherData = await getCurrentCityForecastData(city).catch((err) => {
       toast.error('City not found', {
         position: 'top-right',
@@ -63,6 +66,7 @@ export function WeatherHome() {
     }
     const resultData = mapData(weatherData.data);
     setData(resultData);
+    setIsLoading(false);
   };
 
   const mapData = (data: OpenWeatherForecastResponse): MappedWeatherData => {
@@ -104,10 +108,6 @@ export function WeatherHome() {
     getWeatherData(searchCity);
   };
 
-  if (!data) {
-    return <>Loading...</>;
-  }
-
   return (
     <main
       className='flex items-center justify-center pt-16 pb-4 text-black'
@@ -117,33 +117,41 @@ export function WeatherHome() {
       }}
     >
       <div
-        className='flex gap-5 p-6 rounded-xl'
+        className={`w-full max-w-[800px] h-[500px] sm:h-[600px] flex gap-5 p-6 rounded-xl ${
+          isLoading ? 'items-center justify-center' : ''
+        }`}
         style={{ backgroundColor: '#f2f2fc' }}
       >
-        <CurrentWeatherCard data={data} />
-        <div className='flex flex-col justify-between'>
-          <div className='flex justify-between'>
-            {data?.forecast?.slice(1, 5)?.map((item) => {
-              return <ForecastCard key={item.date} data={item} />;
-            })}
-          </div>
-          <div className='mt-30'>
-            <InputSection
-              inputValue={searchCity}
-              onChangeCity={(city: string) => setSearchCity(city)}
-              onSearchCity={onSearchCity}
-            />
-            <div className='flex gap-5 text-white justify-between'>
-              {/* {sampleData.otherCities.map((item) => {
+        {isLoading ? (
+          <LoadingAnimation />
+        ) : (
+          <>
+            {data && <CurrentWeatherCard data={data} />}
+            <div className='flex flex-col justify-between'>
+              <div className='flex justify-between'>
+                {data?.forecast?.slice(1, 5)?.map((item) => {
+                  return <ForecastCard key={item.date} data={item} />;
+                })}
+              </div>
+              <div className='mt-30'>
+                <InputSection
+                  inputValue={searchCity}
+                  onChangeCity={(city: string) => setSearchCity(city)}
+                  onSearchCity={onSearchCity}
+                />
+                <div className='flex gap-5 text-white justify-between'>
+                  {/* {sampleData.otherCities.map((item) => {
                 return <OtherCityCard key={item.city} data={item} />;
               })} */}
-              <OtherCityCard
-                key={sampleCurrentData.currentCity.city}
-                data={sampleCurrentData}
-              />
+                  <OtherCityCard
+                    key={sampleCurrentData.currentCity.city}
+                    data={sampleCurrentData}
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </main>
   );

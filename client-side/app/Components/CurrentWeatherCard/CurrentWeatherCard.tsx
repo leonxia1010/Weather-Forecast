@@ -14,6 +14,9 @@ interface IForecastCard {
 }
 
 const CurrentWeatherCard = (props: IForecastCard) => {
+  if (!props.data) {
+    return null;
+  }
   const { forecast, currentCity } = props.data;
   const { maxTemp, minTemp, water, wind, pressure, temp, dateLong, weather } =
     forecast[0]; // This is the latest data
